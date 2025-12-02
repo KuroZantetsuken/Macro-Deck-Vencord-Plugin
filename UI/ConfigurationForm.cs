@@ -7,45 +7,34 @@ namespace RecklessBoon.MacroDeck.Discord
 {
     partial class ConfigurationForm : DialogForm
     {
-
         protected static Configuration _config;
 
-        public event EventHandler OnSecretChanged;
+        public event EventHandler OnSecretChanged; // Keeping event to avoid breakages if used elsewhere
         public event EventHandler OnDebugLoggingChanged;
-
-        class TokenChangedArgs : EventArgs
-        {
-            public string oldToken;
-            public string newToken;
-        }
 
         public ConfigurationForm(Configuration config)
         {
             _config = config ?? _config;
             InitializeComponent();
 
-            clientId.Text = config.ClientId;
-            clientSecret.Text = config.ClientSecret;
+            clientId.Text = config.Port.ToString();
             cbxDebugLogging.Checked = config.Debug;
+
+            // Hide unused
+            lblClientSecret.Visible = false;
+            clientSecret.Visible = false;
+            label1.Text = "Port:";
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            var oldSecret = _config.ClientSecret;
-            var newSecret = clientSecret.Text;
-            _config.ClientId = clientId.Text;
-            _config.ClientSecret = newSecret;
+            if (int.TryParse(clientId.Text, out int port))
+            {
+                _config.Port = port;
+            }
+
             var oldDebugLogging = _config.Debug;
             _config.Debug = cbxDebugLogging.Checked;
-
-            if (oldSecret != newSecret)
-            {
-                OnSecretChanged.Invoke(this, new TokenChangedArgs
-                {
-                    oldToken = oldSecret,
-                    newToken = newSecret
-                });
-            }
 
             if (oldDebugLogging != _config.Debug)
             {
@@ -53,15 +42,18 @@ namespace RecklessBoon.MacroDeck.Discord
             }
 
             _config.Save();
+
+            // Signal change (reusing SecretChanged event for simplicity)
+            OnSecretChanged?.Invoke(this, EventArgs.Empty);
+
             this.Close();
         }
 
         private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
         {
-            OpenUrl("https://github.com/RecklessBoon/Macro-Deck-Discord-Plugin#configuration");
+            OpenUrl("https://github.com/RecklessBoon/Macro-Deck-Discord-Plugin"); // Or new repo URL
         }
 
-        // Yoinked from: https://stackoverflow.com/a/43232486
         private void OpenUrl(string url)
         {
             try
@@ -70,23 +62,10 @@ namespace RecklessBoon.MacroDeck.Discord
             }
             catch
             {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     url = url.Replace("&", "^&");
                     Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                    throw;
                 }
             }
         }

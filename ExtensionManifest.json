@@ -1,11 +1,11 @@
 {
   "type": "Plugin",
-  "name": "Discord Plugin",
-  "author": "RecklessBoon",
-  "repository": "https://github.com/RecklessBoon/Macro-Deck-Discord-Plugin",
-  "packageId": "RecklessBoon.DiscordPlugin",
-  "version": "1.1.12",
+  "name": "Vencord Plugin",
+  "author": "Vencord Community",
+  "repository": "https://github.com/Vendicated/Vencord",
+  "packageId": "VencordPlugin",
+  "version": "1.0.0",
   "target-plugin-api-version": 40,
-  "target-macro-deck-version":  "2.13.2",
-  "dll": "Discord Plugin.dll"
+  "target-macro-deck-version": "2.13.2",
+  "dll": "VencordPlugin.dll"
 }

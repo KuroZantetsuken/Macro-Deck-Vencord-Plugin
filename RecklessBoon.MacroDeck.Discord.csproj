@@ -4,15 +4,14 @@
 	<TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
 	<RootNamespace>RecklessBoon.MacroDeck.Discord</RootNamespace>
 	<UseWindowsForms>true</UseWindowsForms>
-    <Version>1.1.12</Version>
-	<RepositoryUrl>https://github.com/RecklessBoon/Macro-Deck-Discord-Plugin</RepositoryUrl>
-    <Authors>RecklessBoon</Authors>
+    <Version>1.0.0</Version>
+	<RepositoryUrl>https://github.com/Vendicated/Vencord</RepositoryUrl>
+    <Authors>Vencord Community</Authors>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <PackageId>Discord Plugin</PackageId>
-	<AssemblyName>Discord Plugin</AssemblyName>
+    <PackageId>VencordPlugin</PackageId>
+	<AssemblyName>VencordPlugin</AssemblyName>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,14 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="3.8.1" />
-    <PackageReference Include="DiscordRichPresence" Version="1.1.1.14" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Macro Deck 2">
-      <HintPath>$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Macro Deck 2.dll</HintPath>
+      <HintPath>C:\Program Files\Macro Deck\Macro Deck 2.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -52,12 +49,5 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="if not exist &quot;$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Data\plugins\$(PackageId)&quot; mkdir &quot;$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Data\plugins\$(PackageId)&quot;" />
-        <Exec Command="copy /Y &quot;$(ProjectDir)ExtensionManifest.json&quot; &quot;$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Data\plugins\$(PackageId)\ExtensionManifest.json&quot;" />
-        <Exec Command="copy /Y &quot;$(ProjectDir)ExtensionIcon.png&quot; &quot;$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Data\plugins\$(PackageId)\ExtensionIcon.png&quot;" />
-        <Exec Command="copy /Y &quot;$(TargetDir)*.dll&quot; &quot;$(SolutionDir)..\Macro-Deck\MacroDeck\bin\$(ConfigurationName)\$(TargetFramework)\win-x64\Data\plugins\$(PackageId)\&quot;" />
-    </Target>
 
 </Project>

@@ -1,8 +1,5 @@
-﻿using DiscordRPC.Logging;
-using RecklessBoon.MacroDeck.Discord.Actions;
-using RecklessBoon.MacroDeck.Discord.RPC;
+﻿using RecklessBoon.MacroDeck.Discord.Actions;
 using RecklessBoon.MacroDeck.Discord.RPC.Model;
-using RecklessBoon.MacroDeck.Discord.RPC.Model.Responses;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
@@ -11,13 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace RecklessBoon.MacroDeck.Discord
 {
-
     public static class PluginInstance
     {
         public static AppLogger Logger;
@@ -32,19 +28,14 @@ namespace RecklessBoon.MacroDeck.Discord
     {
         public Configuration configuration;
 
-        // Optional; If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager.
         public override bool CanConfigure => true;
 
-        protected RPCClient _RPCClient;
-        public RPCClient RPCClient { get { return _RPCClient; } }
+        public WebSocketServer WebSocketServer { get; private set; }
 
         private ContentSelectorButton statusButton = new ContentSelectorButton();
         private ToolTip statusToolTip = new ToolTip();
 
         private MainWindow mainWindow;
-
-        private Task connectingStatusLoop;
-        private CancellationTokenSource connectingStatusLoopCTS;
 
         public class VariableState
         {
@@ -60,7 +51,8 @@ namespace RecklessBoon.MacroDeck.Discord
 
         public void SetVariable(VariableState variableState)
         {
-            VariableManager.SetValue(string.Format("discord_{0}", variableState.Name), variableState.Value, variableState.Type, this, []);
+            // Empty list for suggestions
+            VariableManager.SetValue(string.Format("discord_{0}", variableState.Name), variableState.Value, variableState.Type, this, new string[] { });
         }
 
         public string GetVariable(string key)
@@ -107,7 +99,7 @@ namespace RecklessBoon.MacroDeck.Discord
             {
                 configuration ??= new Configuration(PluginInstance.Plugin);
                 ResetVariables();
-                InitClient();
+                InitServer();
 
                 Actions = new List<PluginAction>
                 {
@@ -119,8 +111,9 @@ namespace RecklessBoon.MacroDeck.Discord
                     new SetDeafenOnAction(),
                     new SetDeafenOffAction(),
                     new ToggleDeafenAction(),
-                    new SetRichPresenceAction(),
-                    new ClearRichPresenceAction(),
+                    // Rich Presence actions disabled for WS version
+                    // new SetRichPresenceAction(),
+                    // new ClearRichPresenceAction(),
                 };
             }
             catch (Exception ex)
@@ -136,7 +129,7 @@ namespace RecklessBoon.MacroDeck.Discord
                 mainWindow = sender as MainWindow;
                 statusButton = new ContentSelectorButton();
                 statusButton.BackgroundImageLayout = ImageLayout.Zoom;
-                UpdateStatusButton(RPCClient != null && RPCClient.IsConnected);
+                UpdateStatusButton(WebSocketServer != null && WebSocketServer.IsConnected);
                 statusButton.Click += StatusButton_Click;
                 mainWindow.contentButtonPanel.Controls.Add(statusButton);
             }
@@ -148,63 +141,10 @@ namespace RecklessBoon.MacroDeck.Discord
 
         private void StatusButton_Click(object sender, EventArgs e)
         {
-            try
+            // Reconnect logic or config?
+            if (configuration == null || !configuration.IsFullySet)
             {
-                if (configuration == null || !configuration.IsFullySet)
-                {
-                    OpenConfigurator();
-                }
-                else
-                {
-                    Task.Run(() =>
-                    {
-                        if (RPCClient != null && !RPCClient.IsDisposed)
-                        {
-                            RPCClient.Dispose();
-                        }
-                        else if (RPCClient == null || RPCClient.IsDisposed || !RPCClient.IsConnected)
-                        {
-                            InitClient();
-                        }
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-            }
-        }
-
-        private async Task StartStatusLoop()
-        {
-            try
-            {
-                if (connectingStatusLoop == null || connectingStatusLoop.Status != TaskStatus.Running)
-                {
-                    connectingStatusLoopCTS = new CancellationTokenSource();
-                    CancellationToken ct = connectingStatusLoopCTS.Token;
-
-                    connectingStatusLoop = Task.Run(() =>
-                    {
-                        do
-                        {
-                            if (connectingStatusLoopCTS.IsCancellationRequested) return;
-                            UpdateStatusButton(true);
-                            Thread.Sleep(750);
-
-                            if (connectingStatusLoopCTS.IsCancellationRequested) return;
-                            UpdateStatusButton(false);
-                            Thread.Sleep(750);
-                        } while ((RPCClient == null || !RPCClient.IsConnected) && !connectingStatusLoopCTS.IsCancellationRequested);
-                    }, ct);
-
-                    await connectingStatusLoop;
-                    UpdateStatusButton(RPCClient != null && RPCClient.IsConnected);
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
+                OpenConfigurator();
             }
         }
 
@@ -250,7 +190,7 @@ namespace RecklessBoon.MacroDeck.Discord
                     {
                         Bitmap bm = connected ? Properties.Resources.Discord_Logo_Color_64x49 : Properties.Resources.Discord_Logo_White_64x49;
                         statusButton.BackgroundImage = PadBitmap(bm, 1.35f);
-                        statusToolTip.SetToolTip(statusButton, "Discord " + (connected ? " Connected" : "Disconnected"));
+                        statusToolTip.SetToolTip(statusButton, "Vencord " + (connected ? "Connected" : "Disconnected"));
                     }));
                 }
             }
@@ -260,73 +200,43 @@ namespace RecklessBoon.MacroDeck.Discord
             }
         }
 
-        protected void InitClient()
+        protected void InitServer()
         {
             try
             {
-                if ((RPCClient == null || RPCClient.IsDisposed) && !String.IsNullOrEmpty(PluginInstance.Plugin.configuration.ClientId))
+                if (WebSocketServer == null)
                 {
-                    _RPCClient = new RPCClient(PluginInstance.Plugin.configuration.ClientId);
-                    ConnectClients();
-                    RPCClient.Start();
+                    WebSocketServer = new WebSocketServer();
+                    WebSocketServer.OnMessage += OnWebSocketMessage;
+                    WebSocketServer.OnConnectionStateChanged += OnConnectionStateChanged;
+                    WebSocketServer.Start(configuration.Port);
                 }
             }
             catch (Exception ex)
             {
-                if (RPCClient != null && !RPCClient.IsDisposed) RPCClient.Dispose();
-                PluginInstance.Logger.Error("Unexpected Exception ocurred while initializing the RPC client:\n{0}", ex);
+                PluginInstance.Logger.Error("Unexpected Exception ocurred while initializing the WS server:\n{0}", ex);
             }
         }
 
-        protected void ConnectClients()
+        private void OnWebSocketMessage(object sender, JObject json)
         {
-            RPCClient.OnConnectBegin += Client_OnConnectBegin;
-            RPCClient.OnConnectEnd += Client_OnConnectEnd;
-            RPCClient.OnConnectFailed += Client_OnConnectFailed;
-            RPCClient.OnConnectStateChanged += Client_OnConnectStateChanged;
-            RPCClient.OnVoiceStateUpdate += Client_OnVoiceStateUpdate;
-            RPCClient.OnVoiceSettingsUpdate += Client_OnVoiceSettingsUpdate;
-        }
-
-        private void CancelConnectingStatusLoop()
-        {
-            if (connectingStatusLoopCTS != null)
+            try
             {
-                connectingStatusLoopCTS.Cancel();
+                if (json["event"]?.ToString() == "VOICE_STATE_UPDATE" && json["data"] != null)
+                {
+                    var voiceState = json["data"].ToObject<VoiceState>();
+                    UpdateVoiceStateVariables(voiceState);
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginInstance.Logger.Error("Error processing WS message: " + ex.Message);
             }
         }
 
-        private void Client_OnConnectBegin(object sender, EventArgs e)
-        {
-            _ = StartStatusLoop();
-        }
-
-        private void Client_OnConnectStateChanged(object sender, bool connected)
+        private void OnConnectionStateChanged(object sender, bool connected)
         {
             UpdateStatusButton(connected);
-        }
-        private void Client_OnConnectFailed(object sender, EventArgs e)
-        {
-            if (RPCClient != null && !RPCClient.IsConnected && RPCClient.ConnectStarted)
-            {
-                _ = StartStatusLoop();
-            }
-        }
-
-        private void Client_OnConnectEnd(object sender, EventArgs e)
-        {
-            try
-            {
-                if (RPCClient != null && !RPCClient.IsConnected)
-                {
-                    _RPCClient = null;
-                }
-                CancelConnectingStatusLoop();
-            }
-            catch (Exception ex)
-            {
-                PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-            }
         }
 
         protected void ResetVariables()
@@ -341,70 +251,9 @@ namespace RecklessBoon.MacroDeck.Discord
             });
         }
 
-        private void Client_OnVoiceSettingsUpdate(object sender, VoiceSettingsResponse payload)
-        {
-            try
-            {
-                if (PluginInstance.cache.CurrentVoiceChannelID == null)
-                {
-                    var currentVoiceState = PluginInstance.cache.VoiceState;
-                    currentVoiceState.SelfMute = payload.IsMute || payload.IsDeaf;
-                    currentVoiceState.SelfDeaf = payload.IsDeaf;
-                    UpdateVoiceStateVariables(currentVoiceState);
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-            }
-        }
-
-        protected void Client_OnVoiceStateUpdate(object sender, VoiceStateResponse payload)
-        {
-            try
-            {
-                if (payload.User.Id == PluginInstance.cache.CurrentUser.Id)
-                {
-                    UpdateVoiceStateVariables(payload.VoiceState);
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-            }
-        }
-
-        // Optional; Gets called when the user clicks on the "Configure" button in the package manager; If CanConfigure is not set to true, you don't need to add this
         public override void OpenConfigurator()
         {
-            // Open your configuration form here
             using var configurator = new ConfigurationForm(configuration);
-            configurator.OnSecretChanged += (object form, EventArgs e) =>
-            {
-                try
-                {
-                    if (RPCClient != null) RPCClient.Dispose();
-                    InitClient();
-                }
-                catch (Exception ex)
-                {
-                    PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-                }
-            };
-            configurator.OnDebugLoggingChanged += (object form, EventArgs e) =>
-            {
-                try
-                {
-                    if (RPCClient != null)
-                    {
-                        RPCClient.SyncClientLogger();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    PluginInstance.Logger.Error("Unexpected Exception:\n{0}", ex);
-                }
-            };
             configurator.ShowDialog();
         }
     }
