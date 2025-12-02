@@ -2,7 +2,7 @@
   "type": "Plugin",
   "name": "Vencord Plugin",
   "author": "Vencord Community",
-  "repository": "https://github.com/Vendicated/Vencord",
+  "repository": "https://github.com/KuroZantetsuken/Macro-Deck-Vencord-Plugin",
   "packageId": "VencordPlugin",
   "version": "1.0.0",
   "target-plugin-api-version": 40,

@@ -1,5 +1,5 @@
 ﻿using RecklessBoon.MacroDeck.Discord.Actions;
-using RecklessBoon.MacroDeck.Discord.RPC.Model;
+using RecklessBoon.MacroDeck.Discord.Models;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
@@ -104,7 +104,6 @@ namespace RecklessBoon.MacroDeck.Discord
                 Actions = new List<PluginAction>
                 {
                     // add the instances of your actions here
-                    new ExecuteWebhookAction(),
                     new SetMuteOnAction(),
                     new SetMuteOffAction(),
                     new ToggleMuteAction(),

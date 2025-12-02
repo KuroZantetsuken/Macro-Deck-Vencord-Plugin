@@ -1,36 +1,23 @@
-﻿using DiscordRPC.Logging;
 using SuchByte.MacroDeck.Logging;
-using System;
-using System.Collections.Generic;
-using LogLevel = DiscordRPC.Logging.LogLevel;
 
 namespace RecklessBoon.MacroDeck.Discord
 {
     public class AppLogger
     {
+        public void Info(string message)
+        {
+            MacroDeckLogger.Info(PluginInstance.Plugin, message);
+        }
 
         public void Error(string message, params object[] args)
         {
-            if (args.Length > 0) message = String.Format(message, args);
-            MacroDeckLogger.Error(PluginInstance.Plugin, String.Format("[ERROR]: {0}", message.ToString()));
+            MacroDeckLogger.Error(PluginInstance.Plugin, string.Format(message, args));
         }
 
-        public void Info(string message, params object[] args)
+        public void Trace(string message)
         {
-            if (args.Length > 0) message = String.Format(message, args);
-            MacroDeckLogger.Info(PluginInstance.Plugin, String.Format("[INFO]: {0}", message.ToString()));
-        }
-
-        public void Trace(string message, params object[] args)
-        {
-            if (args.Length > 0) message = String.Format(message, args);
-            MacroDeckLogger.Trace(PluginInstance.Plugin, String.Format("[TRACE]: {0}", message.ToString()));
-        }
-
-        public void Warning(string message, params object[] args)
-        {
-            if (args.Length > 0) message = String.Format(message, args);
-            MacroDeckLogger.Warning(PluginInstance.Plugin, String.Format("[WARN]: {0}", message.ToString()));
+            // Optional trace logging
+            MacroDeckLogger.Trace(PluginInstance.Plugin, message);
         }
     }
 }

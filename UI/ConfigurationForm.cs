@@ -20,9 +20,9 @@ namespace RecklessBoon.MacroDeck.Discord
             clientId.Text = config.Port.ToString();
             cbxDebugLogging.Checked = config.Debug;
 
-            // Hide unused
-            lblClientSecret.Visible = false;
-            clientSecret.Visible = false;
+            // Hide unused (removed from designer)
+            // lblClientSecret.Visible = false;
+            // clientSecret.Visible = false;
             label1.Text = "Port:";
         }
 

@@ -4,15 +4,8 @@ namespace RecklessBoon.MacroDeck.Discord
 {
     partial class ConfigurationForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -24,17 +17,12 @@ namespace RecklessBoon.MacroDeck.Discord
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
             this.clientId = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblClientSecret = new System.Windows.Forms.Label();
-            this.clientSecret = new RecklessBoon.MacroDeck.Discord.UI.PeekablePassword();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
             this.cbxDebugLogging = new System.Windows.Forms.CheckBox();
@@ -47,7 +35,7 @@ namespace RecklessBoon.MacroDeck.Discord
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(97, 29);
             this.label1.TabIndex = 20;
-            this.label1.Text = "Client Id:";
+            this.label1.Text = "Port:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // clientId
@@ -93,23 +81,7 @@ namespace RecklessBoon.MacroDeck.Discord
             // 
             // lblClientSecret
             // 
-            this.lblClientSecret.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblClientSecret.Location = new System.Drawing.Point(8, 66);
-            this.lblClientSecret.Name = "lblClientSecret";
-            this.lblClientSecret.Size = new System.Drawing.Size(97, 29);
-            this.lblClientSecret.TabIndex = 17;
-            this.lblClientSecret.Text = "Client Secret:";
-            this.lblClientSecret.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // clientSecret
-            // 
-            this.clientSecret.AutoSize = true;
-            this.clientSecret.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.clientSecret.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.clientSecret.Location = new System.Drawing.Point(123, 66);
-            this.clientSecret.Name = "clientSecret";
-            this.clientSecret.Size = new System.Drawing.Size(283, 30);
-            this.clientSecret.TabIndex = 21;
+            this.lblClientSecret.Visible = false;
             // 
             // linkLabel1
             // 
@@ -153,7 +125,6 @@ namespace RecklessBoon.MacroDeck.Discord
             this.Controls.Add(this.cbxDebugLogging);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.clientSecret);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.clientId);
             this.Controls.Add(this.btnOk);
@@ -161,12 +132,11 @@ namespace RecklessBoon.MacroDeck.Discord
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "ConfigurationForm";
             this.Padding = new System.Windows.Forms.Padding(5, 35, 5, 5);
-            this.Text = "Discord Integration Plugin Configuration";
+            this.Text = "Vencord Plugin Configuration";
             this.Controls.SetChildIndex(this.lblClientSecret, 0);
             this.Controls.SetChildIndex(this.btnOk, 0);
             this.Controls.SetChildIndex(this.clientId, 0);
             this.Controls.SetChildIndex(this.label1, 0);
-            this.Controls.SetChildIndex(this.clientSecret, 0);
             this.Controls.SetChildIndex(this.linkLabel1, 0);
             this.Controls.SetChildIndex(this.label2, 0);
             this.Controls.SetChildIndex(this.cbxDebugLogging, 0);
@@ -181,7 +151,6 @@ namespace RecklessBoon.MacroDeck.Discord
         private RoundedTextBox clientId;
         private ButtonPrimary btnOk;
         private System.Windows.Forms.Label lblClientSecret;
-        private UI.PeekablePassword clientSecret;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox cbxDebugLogging;
