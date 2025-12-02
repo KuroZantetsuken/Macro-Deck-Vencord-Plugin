@@ -51,7 +51,7 @@ namespace RecklessBoon.MacroDeck.Discord
 
         private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
         {
-            OpenUrl("https://github.com/RecklessBoon/Macro-Deck-Discord-Plugin"); // Or new repo URL
+            OpenUrl("https://github.com/KuroZantetsuken/Macro-Deck-Vencord-Plugin");
         }
 
         private void OpenUrl(string url)
