@@ -3,9 +3,9 @@
   "name": "Vencord Plugin",
   "author": "Vencord Community",
   "repository": "https://github.com/KuroZantetsuken/Macro-Deck-Vencord-Plugin",
-  "packageId": "VencordPlugin",
+  "packageId": "KuroZantetsuken.VencordPlugin",
   "version": "1.0.0",
   "target-plugin-api-version": 40,
-  "target-macro-deck-version": "2.13.2",
+  "target-macro-deck-version": "2.13",
   "dll": "VencordPlugin.dll"
 }
